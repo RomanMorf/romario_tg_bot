@@ -1,11 +1,14 @@
+require('dotenv').config()
 const TelegramBot = require('node-telegram-bot-api');
-const { gameOptions, alcoholOptions, startOrNoOptions } = require('./options')
-const { gameData } = require('./gameData2')
+const firebase  = require('./firebase')
 
-const token = '5076160316:AAHkj9m25Kfx0T8l4JQbqxt8R0gLpWtE3SI';
+const token = process.env.TOKEN;
 
 const bot = new TelegramBot(token, {polling: true});
-bot.setWebHook(process.env.HEROKU_URL + bot.token);
+// bot.setWebHook(process.env.HEROKU_URL + bot.token);
+
+const { gameOptions, alcoholOptions, startOrNoOptions } = require('./options')
+const { gameData } = require('./gameData2')
 
 
 bot.setMyCommands([
@@ -13,16 +16,43 @@ bot.setMyCommands([
   {command: '/game', description: 'Начало игры по поиску подарка'},
   {command: '/info', description: 'Получить информацию по игре'},
 ])
+let newUser = {
+  name: 'Romario',
+  age: 34
+}
+async function createNewUser(id, newUser = {}) {
+  await firebase
+    .database()
+    .ref(`/users/${id}`)
+    .set(newUser)
+}
 
-let chatId = 1
-let gameCount = 0
+async function getUserData(id) {
+  const userData = await (
+    await firebase
+      .database()
+      .ref(`/users/`)
+      .child(id)
+      .once('value')
+  ).val() || {}
+  console.log(userData, 'userData');
+  return await userData
+}
 
-setInterval(() => {
-  const data = new Date
-  console.log(data, 'gameCount -', gameCount);
-}, 5000);
+async function setUserCount(id, userCount) {
+  await firebase
+    .database()
+    .ref(`/users/${id}/gameCount/`)
+    .set(userCount)
+}
 
-function superPuperGame(text, gameData, chatId) {
+
+async function superPuperGame(text, gameData, chatId, msg) {
+
+  let userData = await getUserData(chatId)
+  console.log(userData.gameCount, 'count');
+  let gameCount = userData.gameCount
+
   if (!gameData[gameCount]) {
     sendMesFunc('Игра окончена... Больше заданий у меня нет', 0, chatId)
     sendMesFunc('Если интересно, всегда можно начать с начала )', 3, chatId)
@@ -30,39 +60,19 @@ function superPuperGame(text, gameData, chatId) {
     return
   }
 
-  if (text === gameData[gameCount].answer ) {
-    let idx = 0
-
-    gameData[gameCount].text.forEach((text, index) => {
-      idx += 1
-      const delay = text[1] || index * 5
-      sendMesFunc(text[0], delay, chatId)
-    })
-
-    if (gameData[gameCount].photo) {
-      gameData[gameCount].photo.forEach((photo, index) => {
-        const delay = photo[1] || idx > index ? idx * 5 : index * 5
-        sendPhotoFunc(photo[0], delay, chatId)
-        idx += 1
-      })
-    }
-    gameCount += 1
-    return
-  } 
-
-  sendMesFunc(gameData[gameCount].altText, 0, chatId)
-}
-
-//---------------------------------------------------------------
-bot.on('message', msg => {
-  const chatId = msg.chat.id;
-  const text = msg.text.toLocaleLowerCase()
-
   if (text === '/start') {
-    gameCount = 0
     const name = msg.from.first_name
     const lastName = msg.from.last_name
+
+    const newUser = {
+      name: name,
+      lastName: lastName,
+      gameCount: 0
+    }
+
     sendMesFunc(`Приветствую - ${name ? name : ''} ${lastName ? lastName : ''}`, 0, chatId, gameOptions)
+    createNewUser(chatId, newUser)
+
     return 
   }
 
@@ -87,12 +97,45 @@ bot.on('message', msg => {
     return 
   }
 
-  superPuperGame(text, gameData, chatId)
+
+  if (text === gameData[gameCount].answer ) {
+    let idx = 0
+
+    gameData[gameCount].text.forEach((text, index) => {
+      idx += 1
+      const delay = text[1] || index * 5
+      sendMesFunc(text[0], delay, chatId)
+    })
+
+    if (gameData[gameCount].photo) {
+      gameData[gameCount].photo.forEach((photo, index) => {
+        const delay = photo[1] || idx > index ? idx * 5 : index * 5
+        sendPhotoFunc(photo[0], delay, chatId)
+        idx += 1
+      })
+    }
+    gameCount += 1
+    setUserCount(chatId, gameCount)
+    return
+  } 
+
+
+  sendMesFunc(gameData[gameCount].altText, 0, chatId)
+}
+
+//---------------------------------------------------------------
+bot.on('message', msg => {
+  const chatId = msg.chat.id;
+  const text = msg.text.toLocaleLowerCase()
+
+  superPuperGame(text, gameData, chatId, msg)
 })
 
 
 function startGame(chatId) {
   gameCount = 1
+  setUserCount(chatId, gameCount)
+
   sendMesFunc('Добро пожаловать в новогодний квест часть вторая ! 🥳 Ну что ж... начнём искать 🎁', 0, chatId)
   sendMesFunc('В первом квесте ты уже научилась принципу отгадывания и прохождения заданий', 4, chatId)
   sendMesFunc('По этому, теперь тебе будет еще лугче и интереснее 😉', 8, chatId, startOrNoOptions)
@@ -111,7 +154,6 @@ bot.on('callback_query', (msg) => {
 
   if (data === '/game') {
     startGame(chatId)
-    gameCount = 1
     return
   }
 
