@@ -44,6 +44,26 @@ async function setUserCount(id, userCount) {
     .set(userCount)
 }
 
+async function getAllUsers() {
+  
+  const usersData = await (
+    await firebase
+      .database()
+      .ref(`/users/`)
+      .once('value')
+    ).val() || []
+
+    const newUsers = await Object.keys(usersData).map((key) => ({ 
+      ...usersData[key],
+    }))
+
+    console.log(newUsers, 'newUsers');
+  return await newUsers
+}
+
+
 exports.createNewUser = createNewUser
 exports.getUserData = getUserData
 exports.setUserCount = setUserCount
+
+exports.getAllUsers = getAllUsers

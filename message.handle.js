@@ -1,6 +1,7 @@
 const { sendMesFunc, sendPhotoFunc} = require('./message.func')
-const { createNewUser, getUserData, setUserCount } = require('./firebase.func')
+const { createNewUser, getUserData, setUserCount, getAllUsers } = require('./firebase.func')
 const { gameOptions, alcoholOptions, startOrNoOptions } = require('./options')
+const { user } = require('pg/lib/defaults')
 
 async function messageHandle(msg, gameData) {
   const chatId = msg.chat.id
@@ -29,15 +30,20 @@ async function messageHandle(msg, gameData) {
     return
   }
 
-  if (text === '/restart') {
-    startGame(chatId)
-    return 
-  }
-
   if (text === '/alco') {
     const name = msg.from.first_name
     const lastname = msg.from.last_name
     sendMesFunc(`Приветствую - ${name ? name : ''} ${lastname ? lastname : ''}`, 0, chatId, alcoholOptions)
+    return 
+  }
+
+  if (text === '/test001') {// service message
+    console.log('test001');
+    const users = await getAllUsers()
+
+    users.forEach(user => {
+      sendMesFunc(`test001 - message for ${user.name}`, 0, user.chatId)
+    })
     return 
   }
 
