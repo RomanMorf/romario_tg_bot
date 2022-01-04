@@ -16,10 +16,7 @@ bot.setMyCommands([
   {command: '/game', description: 'Начало игры по поиску подарка'},
   {command: '/info', description: 'Получить информацию по игре'},
 ])
-let newUser = {
-  name: 'Romario',
-  age: 34
-}
+
 async function createNewUser(id, newUser = {}) {
   await firebase
     .database()
