@@ -17,7 +17,6 @@ async function createNewUser(msg) {
     .set(newUser)
 }
 
-
 async function getUserData(id) {
   const newDate = Date()
   
@@ -45,7 +44,6 @@ async function setUserCount(id, userCount) {
 }
 
 async function getAllUsers() {
-  
   const usersData = await (
     await firebase
       .database()
@@ -57,7 +55,6 @@ async function getAllUsers() {
       ...usersData[key],
     }))
 
-    console.log(newUsers, 'newUsers');
   return await newUsers
 }
 
