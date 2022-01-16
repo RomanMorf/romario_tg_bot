@@ -57,7 +57,6 @@ async function messageHandle(msg, gameData) {
 
     default:
       sendMesFunc(gameData[gameCount].altText, chatId)
-      return;
   }
 
 }
