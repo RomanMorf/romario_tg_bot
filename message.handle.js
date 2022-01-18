@@ -5,8 +5,20 @@ const options = require('./options')
 const messageSendDelay = 3
 
 async function messageHandle(msg, gameData) {
-  const chatId = msg.chat.id
-  const text = msg.text.toLocaleLowerCase()
+  let chatId
+  let text
+
+  if (msg.message_id) {
+    chatId = msg.chat.id
+    text = msg.text.toLocaleLowerCase()
+  } else {
+    chatId = msg.message.chat.id
+    text = msg.data.toLocaleLowerCase()
+  }
+
+
+  let slicedMes = text.split(' | ')
+  console.log(slicedMes, 'splicedMes');
 
   let userData = await getUserData(chatId)
   let gameCount = null
@@ -18,7 +30,6 @@ async function messageHandle(msg, gameData) {
     case '/start':
       const name = msg.from.first_name
       const lastName = msg.from.last_name
-      // if (userData === undefined) createNewUser(msg)
       sendMesFunc(`Приветствую - ${name ? name : ''} ${lastName ? lastName : ''}`, chatId, 0, options.gameOptions)
       return;
 
@@ -26,12 +37,14 @@ async function messageHandle(msg, gameData) {
       sendMesFunc(`Тестовый чат бот. Создан с целью изучения работы telegram api, node js, firebase database`,chatId)
       return;
 
-    case '/test001':
-      console.log('test001');
+    case '/all':
+      console.log('sendtoall');
       const users = await getAllUsers()
-  
+      const prevId = msg.message_id
+      console.log(msg, 'msg');
       users.forEach(user => {
-        sendMesFunc(`test001 - message for ${user.name}`,user.chatId)
+        sendMesFunc(`sendtoall - message for ${user.name}`,user.chatId)
+        sendMesFunc(`sendtoall - message for `,user.chatId)
       })
       return;
 

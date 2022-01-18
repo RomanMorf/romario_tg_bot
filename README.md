@@ -18,5 +18,3 @@
 ### `heroku ps:scale run=1` Start dyno on heroku remote server
 
 ### `heroku ps` Check all dynos on remoute heroku server
-
-

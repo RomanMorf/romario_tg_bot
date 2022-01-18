@@ -3,7 +3,7 @@ const { messageHandle } = require('./message.handle')
 const { sendMesFunc } = require('./message.func')
 const { setUserCount } = require('./firebase.func')
 
-const { gameData } = require('./data/gameData2')
+const { gameData } = require('./data/gameData3')
 
 bot.setMyCommands([
   {command: '/start', description: 'Начальное приветствие'},
@@ -18,20 +18,17 @@ bot.on('message', msg => {
 
 //---------------------------------------------------------------
 
-bot.on('callback_query', msg => {
+bot.on('callback_query', async msg => {
   const data = msg.data
   const chatId = msg.message.chat.id
 
   if (data === '/game') {
-    setUserCount(chatId, 1)
-    sendMesFunc(`Поехали !!! `,chatId)
-    sendMesFunc(`Итак.... Первый вопрос`,chatId, 3)
-    sendMesFunc(`В каком городе мы сейчас находимся ?`,chatId, 5)
+    await setUserCount(chatId, 0)
+    await messageHandle(msg, gameData)
     return
   }
 
   if (data === '/rules') {
-    setUserCount(chatId, 1)
     sendMesFunc(`Правила:`,chatId)
     sendMesFunc(`
 1. ... 
@@ -41,7 +38,6 @@ bot.on('callback_query', msg => {
     return
   }
 
-  
 })
 
 //---------------------------------------------------------------
