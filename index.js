@@ -2,11 +2,12 @@ const bot = require('./bot.api')
 const { messageHandle } = require('./message.handle')
 const { callbackHandle } = require('./callback.handle')
 
-const { gameData } = require('./data/gameData-masha-new')
+const { gameData } = require('./data/gameData-andrey')
+// const { gameData } = require('./data/gameData-masha-new')
 
 bot.setMyCommands([
-  {command: '/start', description: 'Початкове вітання'},
-  {command: '/info', description: 'Інформація щодо бота'},
+  {command: '/start', description: 'Начальное приветсвие'},
+  {command: '/info', description: 'Информация о боте'},
 ])
 
 //---------------------------------------------------------------

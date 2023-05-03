@@ -7,11 +7,11 @@ module.exports = {
       ]
     })
   },
-  settingsOption: {
+  gameOptionsRU: {
     reply_markup: JSON.stringify({
       inline_keyboard: [
-        [{text: 'Почати гру', callback_data: '/game'}],
-        [{text: 'Правила гри', callback_data: '/rules'}],
+        [{text: 'Начать игру', callback_data: '/game'}],
+        [{text: 'Правила игры', callback_data: '/rules'}],
       ]
     })
   },

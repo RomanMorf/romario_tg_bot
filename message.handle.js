@@ -1,4 +1,4 @@
-const { sendMesFunc, sendPhotoFunc} = require('./message.func')
+const { sendMesFunc, sendPhotoFunc } = require('./message.func')
 const { createNewUser, getUserData, setUserCount, getAllUsers } = require('./firebase.func')
 const { showRules } = require('./message.rules')
 
@@ -36,6 +36,7 @@ async function messageHandle(msg, gameData) {
 
   let userData = await getUserData(chatId)
   let gameCount = null
+
   if (userData === undefined) await createNewUser(msg)
 
   if (userData !== undefined) gameCount = userData.gameCount
@@ -43,7 +44,7 @@ async function messageHandle(msg, gameData) {
   if (text === '/start') {
     const name = msg.from.first_name
     const lastName = msg.from.last_name
-    sendMesFunc(`Вітаю - ${name ? name : ''} ${lastName ? lastName : ''}`, chatId, 0, options.gameOptions)
+    sendMesFunc(`Вітаю - ${name ? name : ''} ${lastName ? lastName : ''}`, chatId, 0, options.gameOptionsRU)
     return;
   }
 
@@ -53,7 +54,7 @@ async function messageHandle(msg, gameData) {
   }
 
   if (text === '/info') {
-    sendMesFunc(`Цього бота було створенов в розважальних цілях )`, chatId)
+    sendMesFunc(`Этот бот был создан в развлекательный целях )`, chatId)
     return;
   }
 
@@ -78,12 +79,15 @@ async function messageHandle(msg, gameData) {
     gameData[gameCount].text.forEach((text, index) => {
       if (text[0].includes('http')) {
         const delay = text[1] || idx > index ? idx * messageSendDelay : index * messageSendDelay
-
         sendPhotoFunc(text[0], chatId, delay)
 
       } else {
-        const delay = text[1] || idx > index ? idx * messageSendDelay : index * messageSendDelay
+        // const delay = text[1] || idx > index ? idx * messageSendDelay : index * messageSendDelay
+        const delay = text[1] || index * messageSendDelay
 
+        console.log(text[1], 'text[1]');
+        console.log(delay, 'delay');
+        
         sendMesFunc(text[0], chatId, delay)
       }
 
